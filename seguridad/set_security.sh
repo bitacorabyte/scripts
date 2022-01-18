@@ -15,13 +15,13 @@
 # 5. Reiniciar el servicio ssh
 ##
 # 1. Actualizar sistema
-echo "1. ACTUALIZANDO SISTEMA"
+echo "*** 1. ACTUALIZANDO SISTEMA"
 apt update && apt upgrade -y
 # 2. Instalando Fail2ban
-echo "2. INSTALANDO FAIL2BAN"
-apt install fail2ban
+echo "*** 2. INSTALANDO FAIL2BAN"
+apt install fail2ban -y
 # 3. SSH. Crear grupo y usuario espec  fico
-echo "SSH. CREANDO GRUPO Y USUARIO"
+echo "*** 3. SSH. CREANDO GRUPO Y USUARIO"
 echo -n "Nombre del grupo de usuarios para SSH: "
 read -r grupo
 addgroup $grupo
@@ -29,7 +29,7 @@ echo -n "Usuario: "
 read -r user
 adduser --ingroup $grupo $user
 # 4. SSH. Modificando archivo de configuraci  n
-echo 'SSH. MODIFICANDO LA CONFIGURACI ^sN'
+echo '*** 4. SSH. MODIFICANDO LA CONFIGURACIÓN'
 sed -i -e '$aPermitRootLogin No\nPermitEmptyPasswords No\nDenyGroups All\nAllowGroups '"$grupo"'' /etc/ssh/sshd_config
 # 5. SSH. Reiniciar servicio
 service ssh restart

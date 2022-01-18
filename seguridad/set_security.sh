@@ -19,7 +19,7 @@ echo "1. ACTUALIZANDO SISTEMA"
 apt update && apt upgrade -y
 # 2. Instalando Fail2ban
 echo "2. INSTALANDO FAIL2BAN"
-apt install fail2-ban
+apt install fail2ban
 # 3. SSH. Crear grupo y usuario espec  fico
 echo "SSH. CREANDO GRUPO Y USUARIO"
 echo -n "Nombre del grupo de usuarios para SSH: "

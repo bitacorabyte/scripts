@@ -36,13 +36,13 @@ TIMEZONE = "Europe/Madrid"
 echo -n "Password para el root de la BD: "
 read -r DB_ROOT_PSW
 echo -n "Usuario de BD para LibreNMS: "
-echo -r DB_USER
+read -r DB_USER
 echo -n "Password de BD para el usuario de LibreNMS: "
-echo -r DB_PSW
+read -r DB_PSW
 echo -n "Nombre para la BD: "
-echo -r DB_NAME
+read -r DB_NAME
 echo -n "Usuario de LibreNMS"
-echo -r LNMS_USER
+read -r LNMS_USER
 
 # 3 Instalar dependencias
 echo "***3 .Instalando dependencias."

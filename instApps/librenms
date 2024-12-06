@@ -1,0 +1,94 @@
+#!/bin/bash
+# Bitacora Byte
+# 07/12/2024
+
+# Actualizar el sistema
+echo "Actualizando el sistema..."
+apt update && apt upgrade -y
+
+# Instalar dependencias necesarias
+echo "Instalando dependencias..."
+apt install -y \
+    curl \
+    gnupg2 \
+    lsb-release \
+    ca-certificates \
+    apt-transport-https \
+    sudo \
+    software-properties-common \
+    unzip \
+    git \
+    nginx \
+    php-cli php-common php-mbstring php-xml php-zip php-mysqli php-curl php-bcmath php-gd php-json php-intl php-mbstring php-soap php-xmlrpc php-fpm \
+    mariadb-server mariadb-client \
+    snmp snmpd \
+    rrdtool \
+    fping \
+    imagemagick \
+    graphviz \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    libssl-dev \
+    libaio1
+
+# Añadir el repositorio de LibreNMS
+echo "Añadiendo el repositorio de LibreNMS..."
+curl -sSL https://packages.librenms.org/install.sh | bash
+
+# Configurar MariaDB
+echo "Configurando MariaDB..."
+mysql_secure_installation
+
+# Crear base de datos y usuario de LibreNMS
+echo "Creando base de datos para LibreNMS..."
+mysql -u root -p -e "CREATE DATABASE librenms; CREATE USER 'librenms'@'localhost' IDENTIFIED BY 'librenms_password'; GRANT ALL PRIVILEGES ON librenms.* TO 'librenms'@'localhost'; FLUSH PRIVILEGES;"
+
+# Descargar LibreNMS
+echo "Descargando LibreNMS..."
+cd /opt
+git clone https://github.com/librenms/librenms.git librenms
+cd librenms
+chmod +x install.php
+
+# Configuración inicial de LibreNMS
+echo "Realizando configuración inicial..."
+cp .env.example .env
+php artisan key:generate
+
+# Configuración de Nginx
+echo "Configurando Nginx..."
+cat <<EOL > /etc/nginx/sites-available/librenms
+server {
+    listen 80;
+    server_name librenms.local;
+
+    root /opt/librenms/html;
+    index index.php index.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOL
+
+# Activar el sitio de LibreNMS y reiniciar Nginx
+echo "Activando la configuración de Nginx..."
+ln -s /etc/nginx/sites-available/librenms /etc/nginx/sites-enabled/
+systemctl restart nginx
+
+# Ajustar permisos de los archivos de LibreNMS
+echo "Ajustando permisos de los archivos de LibreNMS..."
+chown -R librenms:librenms /opt/librenms
+chmod -R
